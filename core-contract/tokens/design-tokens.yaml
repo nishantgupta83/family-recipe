@@ -1,0 +1,580 @@
+# Family Recipe App - Design Tokens Contract
+# Version: 1.0.0
+# Both iOS and Android render these tokens using native components
+
+# =============================================================================
+# TOKEN STRUCTURE
+# =============================================================================
+
+TemplateTokens:
+  description: "Design tokens that define a visual template"
+  fields:
+    key:
+      type: TemplateKey
+      description: "Unique identifier for this template"
+
+    displayName:
+      type: String
+      description: "Human-readable template name"
+
+    description:
+      type: String
+      description: "Brief description of the template style"
+
+    # Typography
+    typography:
+      headingFontFamily:
+        type: String
+        description: "Font for headings (iOS: Font name, Android: FontFamily)"
+
+      bodyFontFamily:
+        type: String
+        description: "Font for body text"
+
+      handwrittenFontFamily:
+        type: String
+        description: "Font for handwritten/accent text"
+
+      fontScale:
+        type: Double
+        default: 1.0
+        description: "Global font scale multiplier"
+
+    # Colors (using hex format for cross-platform)
+    palette:
+      primary:
+        type: Color
+        description: "Primary brand color"
+
+      secondary:
+        type: Color
+        description: "Secondary/accent color"
+
+      accent:
+        type: Color
+        description: "Highlight/call-to-action color"
+
+      background:
+        type: Color
+        description: "Main background color"
+
+      surface:
+        type: Color
+        description: "Card/elevated surface color"
+
+      text:
+        type: Color
+        description: "Primary text color"
+
+      textSecondary:
+        type: Color
+        description: "Secondary/muted text color"
+
+      divider:
+        type: Color
+        description: "Divider/border color"
+
+      error:
+        type: Color
+        description: "Error state color"
+
+      success:
+        type: Color
+        description: "Success state color"
+
+    # Shape
+    shape:
+      cornerRadius:
+        small:
+          type: Number
+          description: "Small corner radius (buttons, chips)"
+
+        medium:
+          type: Number
+          description: "Medium corner radius (cards)"
+
+        large:
+          type: Number
+          description: "Large corner radius (modals, bottom sheets)"
+
+    # Spacing
+    spacing:
+      scale:
+        type: Number
+        default: 4
+        description: "Base spacing unit in points/dp"
+
+      xs:
+        type: Number
+        description: "Extra small spacing (scale * 1)"
+
+      sm:
+        type: Number
+        description: "Small spacing (scale * 2)"
+
+      md:
+        type: Number
+        description: "Medium spacing (scale * 4)"
+
+      lg:
+        type: Number
+        description: "Large spacing (scale * 6)"
+
+      xl:
+        type: Number
+        description: "Extra large spacing (scale * 8)"
+
+    # Decoration
+    decoration:
+      ornamentStyle:
+        type: OrnamentStyle
+        description: "Decorative element style"
+
+      shadowStyle:
+        type: ShadowStyle
+        description: "Shadow/elevation style"
+
+      borderStyle:
+        type: BorderStyle
+        description: "Border treatment"
+
+# =============================================================================
+# TEMPLATE: VINTAGE
+# =============================================================================
+
+vintage:
+  key: "vintage"
+  displayName: "Vintage Cookbook"
+  description: "Like grandma's handwritten recipe cards - warm, nostalgic, personal"
+
+  typography:
+    headingFontFamily:
+      ios: "DancingScript-Bold"
+      android: "dancing_script_bold"
+      fallback: "cursive"
+
+    bodyFontFamily:
+      ios: "Kalam-Regular"
+      android: "kalam_regular"
+      fallback: "serif"
+
+    handwrittenFontFamily:
+      ios: "DancingScript-Regular"
+      android: "dancing_script"
+      fallback: "cursive"
+
+    fontScale: 1.0
+
+  palette:
+    primary: "#8B4513"          # Saddle Brown
+    secondary: "#F5E6D3"        # Antique White
+    accent: "#D4AF37"           # Gold
+    background: "#FFFEF7"       # Cream
+    surface: "#FFFFFF"          # White
+    text: "#4A4A4A"             # Dark Gray
+    textSecondary: "#7A7A7A"    # Medium Gray
+    divider: "#E0D4C4"          # Light Brown
+    error: "#C53030"            # Red
+    success: "#38A169"          # Green
+
+  shape:
+    cornerRadius:
+      small: 8
+      medium: 16
+      large: 24
+
+  spacing:
+    scale: 4
+    xs: 4
+    sm: 8
+    md: 16
+    lg: 24
+    xl: 32
+
+  decoration:
+    ornamentStyle: "flourish"   # Decorative corner flourishes
+    shadowStyle: "soft"         # Soft, warm shadows
+    borderStyle: "double"       # Double-line vintage border
+
+# =============================================================================
+# TEMPLATE: MODERN
+# =============================================================================
+
+modern:
+  key: "modern"
+  displayName: "Modern Kitchen"
+  description: "Clean, minimal, and contemporary - Material Design inspired"
+
+  typography:
+    headingFontFamily:
+      ios: "Inter-Bold"
+      android: "inter_bold"
+      fallback: "system-ui"
+
+    bodyFontFamily:
+      ios: "Inter-Regular"
+      android: "inter_regular"
+      fallback: "system-ui"
+
+    handwrittenFontFamily:
+      ios: "Inter-Medium"
+      android: "inter_medium"
+      fallback: "system-ui"
+
+    fontScale: 1.0
+
+  palette:
+    primary: "#2563EB"          # Blue
+    secondary: "#F1F5F9"        # Slate 100
+    accent: "#3B82F6"           # Blue 500
+    background: "#FFFFFF"       # White
+    surface: "#F8FAFC"          # Slate 50
+    text: "#1E293B"             # Slate 800
+    textSecondary: "#64748B"    # Slate 500
+    divider: "#E2E8F0"          # Slate 200
+    error: "#DC2626"            # Red 600
+    success: "#16A34A"          # Green 600
+
+  shape:
+    cornerRadius:
+      small: 4
+      medium: 8
+      large: 16
+
+  spacing:
+    scale: 4
+    xs: 4
+    sm: 8
+    md: 16
+    lg: 24
+    xl: 32
+
+  decoration:
+    ornamentStyle: "none"       # No decorations
+    shadowStyle: "elevation"    # Material-style elevation
+    borderStyle: "none"         # No borders, use elevation
+
+# =============================================================================
+# TEMPLATE: PLAYFUL
+# =============================================================================
+
+playful:
+  key: "playful"
+  displayName: "Playful Family"
+  description: "Fun, colorful, and kid-friendly - perfect for cooking with children"
+
+  typography:
+    headingFontFamily:
+      ios: "Fredoka-Bold"
+      android: "fredoka_bold"
+      fallback: "comic sans ms"
+
+    bodyFontFamily:
+      ios: "Nunito-Regular"
+      android: "nunito_regular"
+      fallback: "sans-serif"
+
+    handwrittenFontFamily:
+      ios: "Fredoka-Medium"
+      android: "fredoka_medium"
+      fallback: "comic sans ms"
+
+    fontScale: 1.05
+
+  palette:
+    primary: "#F97316"          # Orange 500
+    secondary: "#FEF3C7"        # Amber 100
+    accent: "#22C55E"           # Green 500
+    background: "#FFFBEB"       # Amber 50
+    surface: "#FFFFFF"          # White
+    text: "#292524"             # Stone 800
+    textSecondary: "#78716C"    # Stone 500
+    divider: "#FDE68A"          # Amber 200
+    error: "#EF4444"            # Red 500
+    success: "#10B981"          # Emerald 500
+
+  shape:
+    cornerRadius:
+      small: 12
+      medium: 20
+      large: 28
+
+  spacing:
+    scale: 4
+    xs: 4
+    sm: 8
+    md: 16
+    lg: 24
+    xl: 32
+
+  decoration:
+    ornamentStyle: "icons"      # Fun food icons as decorations
+    shadowStyle: "colorful"     # Colored shadows
+    borderStyle: "dashed"       # Playful dashed borders
+
+# =============================================================================
+# DECORATION ENUMS
+# =============================================================================
+
+OrnamentStyle:
+  values:
+    none:
+      description: "No decorative elements"
+      ios_implementation: "EmptyView()"
+      android_implementation: "null"
+
+    flourish:
+      description: "Vintage corner flourishes"
+      ios_implementation: "Image('flourish_corner')"
+      android_implementation: "R.drawable.flourish_corner"
+
+    icons:
+      description: "Food-related icons (fork, spoon, chef hat)"
+      ios_implementation: "Image(systemName: 'fork.knife')"
+      android_implementation: "Icons.Default.Restaurant"
+
+ShadowStyle:
+  values:
+    none:
+      elevation: 0
+      color: "transparent"
+
+    soft:
+      elevation: 4
+      color: "rgba(139, 69, 19, 0.1)"  # Brown tint for vintage
+      blur: 8
+      offset_y: 4
+
+    elevation:
+      elevation: 2
+      color: "rgba(0, 0, 0, 0.1)"
+      blur: 4
+      offset_y: 2
+
+    colorful:
+      elevation: 4
+      color: "rgba(249, 115, 22, 0.2)"  # Orange tint for playful
+      blur: 12
+      offset_y: 4
+
+BorderStyle:
+  values:
+    none:
+      width: 0
+      style: "none"
+
+    single:
+      width: 1
+      style: "solid"
+
+    double:
+      width: 2
+      style: "double"
+
+    dashed:
+      width: 2
+      style: "dashed"
+
+# =============================================================================
+# SEMANTIC TOKENS (Category Colors)
+# =============================================================================
+
+CategoryColors:
+  description: "Colors for recipe categories, consistent across templates"
+  entries:
+    breakfast:
+      background: "#FEF3C7"     # Amber 100
+      foreground: "#D97706"     # Amber 600
+      icon: "sunrise"
+
+    brunch:
+      background: "#FECACA"     # Red 200
+      foreground: "#DC2626"     # Red 600
+      icon: "sun.and.horizon"
+
+    lunch:
+      background: "#D1FAE5"     # Emerald 100
+      foreground: "#059669"     # Emerald 600
+      icon: "leaf"
+
+    dinner:
+      background: "#DBEAFE"     # Blue 100
+      foreground: "#2563EB"     # Blue 600
+      icon: "moon.stars"
+
+    appetizer:
+      background: "#E0E7FF"     # Indigo 100
+      foreground: "#4F46E5"     # Indigo 600
+      icon: "fork.knife"
+
+    snack:
+      background: "#FCE7F3"     # Pink 100
+      foreground: "#DB2777"     # Pink 600
+      icon: "carrot"
+
+    dessert:
+      background: "#FDE68A"     # Amber 200
+      foreground: "#B45309"     # Amber 700
+      icon: "birthday.cake"
+
+    beverage:
+      background: "#CFFAFE"     # Cyan 100
+      foreground: "#0891B2"     # Cyan 600
+      icon: "cup.and.saucer"
+
+    side:
+      background: "#DCFCE7"     # Green 100
+      foreground: "#16A34A"     # Green 600
+      icon: "leaf.circle"
+
+# =============================================================================
+# DIFFICULTY COLORS
+# =============================================================================
+
+DifficultyColors:
+  easy:
+    background: "#D1FAE5"       # Emerald 100
+    foreground: "#059669"       # Emerald 600
+    label: "Easy"
+
+  medium:
+    background: "#FEF3C7"       # Amber 100
+    foreground: "#D97706"       # Amber 600
+    label: "Medium"
+
+  hard:
+    background: "#FEE2E2"       # Red 100
+    foreground: "#DC2626"       # Red 600
+    label: "Challenging"
+
+# =============================================================================
+# EMOTION TOKENS (Context-Based Theming)
+# =============================================================================
+
+EmotionTokens:
+  description: "Context-based color overrides based on app mode"
+
+  calm:
+    description: "Browsing mode - relaxed, warm"
+    background: "#FFFEF7"       # Warm cream
+    accent: "#D4AF37"           # Gold
+    surface: "#FFFFF5"          # Soft white
+    useCase: "Home screen, recipe browsing, favorites"
+
+  focus:
+    description: "Cooking mode - clear, focused"
+    background: "#FFFFFF"       # Pure white
+    accent: "#2563EB"           # Blue
+    surface: "#F8FAFC"          # Light gray
+    useCase: "Step-by-step cooking, active timers"
+
+  celebrate:
+    description: "Completion mode - joyful, accomplished"
+    background: "#FEF3C7"       # Warm amber
+    accent: "#F59E0B"           # Orange
+    surface: "#FFFBEB"          # Light amber
+    useCase: "Recipe completed, achievements, celebrations"
+
+  warning:
+    description: "Attention needed - timer alerts, low confidence"
+    background: "#FEF2F2"       # Light red
+    accent: "#EF4444"           # Red
+    surface: "#FFFFFF"          # White
+    useCase: "Timer alerts, OCR low confidence, safety warnings"
+
+# =============================================================================
+# TYPOGRAPHY SCALE
+# =============================================================================
+
+TypographyScale:
+  description: "Text styles for both platforms"
+  styles:
+    displayLarge:
+      size: 36
+      weight: "bold"
+      lineHeight: 1.2
+      letterSpacing: -0.5
+
+    displayMedium:
+      size: 28
+      weight: "bold"
+      lineHeight: 1.25
+      letterSpacing: -0.25
+
+    titleLarge:
+      size: 22
+      weight: "semibold"
+      lineHeight: 1.3
+      letterSpacing: 0
+
+    titleMedium:
+      size: 18
+      weight: "semibold"
+      lineHeight: 1.35
+      letterSpacing: 0.15
+
+    bodyLarge:
+      size: 16
+      weight: "regular"
+      lineHeight: 1.5
+      letterSpacing: 0.5
+
+    bodyMedium:
+      size: 14
+      weight: "regular"
+      lineHeight: 1.45
+      letterSpacing: 0.25
+
+    labelLarge:
+      size: 14
+      weight: "medium"
+      lineHeight: 1.4
+      letterSpacing: 0.1
+
+    labelMedium:
+      size: 12
+      weight: "medium"
+      lineHeight: 1.35
+      letterSpacing: 0.5
+
+    caption:
+      size: 12
+      weight: "regular"
+      lineHeight: 1.3
+      letterSpacing: 0.4
+
+# =============================================================================
+# ANIMATION TOKENS
+# =============================================================================
+
+AnimationTokens:
+  durations:
+    instant: 100
+    fast: 200
+    normal: 300
+    slow: 500
+
+  curves:
+    easeIn: "cubic-bezier(0.4, 0, 1, 1)"
+    easeOut: "cubic-bezier(0, 0, 0.2, 1)"
+    easeInOut: "cubic-bezier(0.4, 0, 0.2, 1)"
+    spring: "spring(response: 0.3, dampingFraction: 0.7)"
+
+# =============================================================================
+# IMPLEMENTATION NOTES
+# =============================================================================
+
+ImplementationNotes:
+  ios: |
+    - Use SwiftUI's @Environment(\.templateTokens) for access
+    - Create TemplateTokens as @Observable class
+    - Font loading: use FontFamily enum with custom fonts bundled
+    - Colors: use Color(hex:) extension
+    - Apply via .environment(\.templateTokens, currentTemplate)
+
+  android: |
+    - Use CompositionLocalProvider for theme tokens
+    - Create TemplateTokens data class
+    - Font loading: use FontFamily with resource fonts
+    - Colors: use Color(0xFF...) format
+    - Apply via LocalTemplateTokens.current in composables

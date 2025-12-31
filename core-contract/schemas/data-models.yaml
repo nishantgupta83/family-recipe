@@ -1,0 +1,891 @@
+# Family Recipe App - Core Data Models Contract
+# Version: 1.0.0
+# Both iOS and Android implementations MUST adhere to these schemas
+
+# =============================================================================
+# RECIPE MODEL
+# =============================================================================
+Recipe:
+  description: "A recipe that belongs to a family"
+  fields:
+    id:
+      type: UUID
+      required: true
+      description: "Unique identifier"
+
+    title:
+      type: String
+      required: true
+      maxLength: 200
+      description: "Recipe title"
+
+    description:
+      type: String
+      required: false
+      maxLength: 2000
+      description: "Brief description of the recipe"
+
+    ingredients:
+      type: "[Ingredient]"
+      required: true
+      minItems: 1
+      description: "List of ingredients"
+
+    instructions:
+      type: "[Instruction]"
+      required: true
+      minItems: 1
+      description: "Step-by-step cooking instructions"
+
+    category:
+      type: RecipeCategory
+      required: true
+      description: "Main category (breakfast, lunch, dinner, etc.)"
+
+    difficulty:
+      type: Difficulty
+      required: true
+      default: "medium"
+      description: "Cooking difficulty level"
+
+    prepTimeMinutes:
+      type: Int
+      required: true
+      min: 0
+      description: "Preparation time in minutes"
+
+    cookTimeMinutes:
+      type: Int
+      required: true
+      min: 0
+      description: "Cooking time in minutes"
+
+    servings:
+      type: Int
+      required: true
+      min: 1
+      default: 4
+      description: "Number of servings"
+
+    # Family-specific fields
+    familyId:
+      type: UUID
+      required: true
+      description: "ID of the family this recipe belongs to"
+
+    createdById:
+      type: UUID
+      required: true
+      description: "ID of the family member who created this recipe"
+
+    familyMemory:
+      type: String
+      required: false
+      maxLength: 5000
+      description: "Special memory or story associated with this recipe"
+
+    favoritedBy:
+      type: "[UUID]"
+      required: false
+      default: []
+      description: "List of family member IDs who favorited this recipe"
+
+    imageUrl:
+      type: String
+      required: false
+      description: "URL to recipe image (Firebase Storage)"
+
+    tags:
+      type: "[String]"
+      required: false
+      default: []
+      description: "Custom tags for organization"
+
+    # Timestamps
+    createdAt:
+      type: Timestamp
+      required: true
+      description: "When the recipe was created"
+
+    updatedAt:
+      type: Timestamp
+      required: true
+      description: "When the recipe was last updated"
+
+    # Sync metadata
+    syncStatus:
+      type: SyncStatus
+      required: true
+      default: "local"
+      description: "Current sync state"
+
+    # Scanned source (for OCR-imported recipes)
+    scannedSource:
+      type: ScannedSource
+      required: false
+      description: "Original scan data if recipe was imported via OCR"
+
+# =============================================================================
+# SCANNED SOURCE MODEL
+# =============================================================================
+ScannedSource:
+  description: "Original scan data preserved when recipe imported via OCR"
+  fields:
+    images:
+      type: "[String]"
+      required: true
+      minItems: 1
+      description: "URLs to original scanned images (preserved forever)"
+
+    rawOCRText:
+      type: String
+      required: true
+      description: "Raw extracted OCR text before parsing"
+
+    importedAt:
+      type: Timestamp
+      required: true
+      description: "When the scan was imported"
+
+    confidenceScore:
+      type: Double
+      required: false
+      min: 0.0
+      max: 1.0
+      description: "Overall OCR confidence (0-1)"
+
+    lowConfidenceRanges:
+      type: "[TextRange]"
+      required: false
+      description: "Character ranges with low OCR confidence for UI highlighting"
+
+# =============================================================================
+# TEXT RANGE MODEL
+# =============================================================================
+TextRange:
+  description: "Character range in text for highlighting low-confidence OCR"
+  fields:
+    start:
+      type: Int
+      required: true
+      min: 0
+
+    end:
+      type: Int
+      required: true
+      min: 0
+
+    confidence:
+      type: Double
+      required: true
+      min: 0.0
+      max: 1.0
+
+# =============================================================================
+# INGREDIENT MODEL
+# =============================================================================
+Ingredient:
+  description: "A single ingredient in a recipe"
+  fields:
+    id:
+      type: UUID
+      required: true
+
+    name:
+      type: String
+      required: true
+      maxLength: 200
+
+    amount:
+      type: Double
+      required: true
+      min: 0
+
+    unit:
+      type: MeasurementUnit
+      required: true
+
+    notes:
+      type: String
+      required: false
+      maxLength: 500
+      description: "Optional notes (e.g., 'finely chopped')"
+
+    isOptional:
+      type: Boolean
+      required: false
+      default: false
+
+# =============================================================================
+# INSTRUCTION MODEL
+# =============================================================================
+Instruction:
+  description: "A single cooking instruction step"
+  fields:
+    id:
+      type: UUID
+      required: true
+
+    stepNumber:
+      type: Int
+      required: true
+      min: 1
+
+    text:
+      type: String
+      required: true
+      maxLength: 2000
+
+    durationSeconds:
+      type: Int
+      required: false
+      description: "Optional timing for this step (e.g., 'bake for 20 minutes')"
+
+    imageUrl:
+      type: String
+      required: false
+      description: "Optional step image"
+
+# =============================================================================
+# FAMILY MODEL
+# =============================================================================
+Family:
+  description: "A family group that owns recipes"
+  fields:
+    id:
+      type: UUID
+      required: true
+
+    name:
+      type: String
+      required: true
+      maxLength: 100
+      description: "Family name (e.g., 'The Gupta Family')"
+
+    description:
+      type: String
+      required: false
+      maxLength: 500
+      description: "Family motto or description"
+
+    # Invite Code Security
+    inviteCodeHash:
+      type: String
+      required: true
+      description: "SHA-256 hash of invite code (never store raw code in cloud)"
+
+    inviteCodeCreatedAt:
+      type: Timestamp
+      required: true
+      description: "When current invite code was generated"
+
+    inviteCodeAttempts:
+      type: Int
+      required: true
+      default: 0
+      description: "Failed join attempts counter for rate limiting"
+
+    inviteCodeLastAttemptAt:
+      type: Timestamp
+      required: false
+      description: "Last failed attempt timestamp"
+
+    adminMemberId:
+      type: UUID
+      required: true
+      description: "ID of the family admin"
+
+    memberIds:
+      type: "[UUID]"
+      required: true
+      minItems: 1
+      maxItems: 20
+      description: "List of all family member IDs"
+
+    # Customization (see FamilyCustomization for override layers)
+    customization:
+      type: FamilyCustomization
+      required: true
+      description: "Theme and display customization"
+
+    language:
+      type: LanguageCode
+      required: true
+      default: "en"
+      description: "Primary language for the family"
+
+    units:
+      type: UnitSystem
+      required: true
+      default: "imperial"
+      description: "Measurement system preference"
+
+    iconEmoji:
+      type: String
+      required: false
+      default: "👨‍👩‍👧‍👦"
+      description: "Family icon emoji"
+
+    # Sync settings
+    syncEnabled:
+      type: Boolean
+      required: true
+      default: true
+      description: "Per-family toggle for cloud sync (disabled = fully local)"
+
+    # Lifecycle metadata
+    archivedAt:
+      type: Timestamp
+      required: false
+      description: "When family was archived (paused without deletion)"
+
+    archivedBy:
+      type: UUID
+      required: false
+      description: "Admin who archived the family"
+
+    # Timestamps
+    createdAt:
+      type: Timestamp
+      required: true
+
+    lastActivityAt:
+      type: Timestamp
+      required: true
+
+# =============================================================================
+# FAMILY CUSTOMIZATION MODEL (Override Layers)
+# =============================================================================
+FamilyCustomization:
+  description: "Theme customization with base template + family overrides"
+  fields:
+    templateKey:
+      type: TemplateKey
+      required: true
+      default: "vintage"
+      description: "Base template (vintage, modern, playful)"
+
+    accentColorOverride:
+      type: String
+      required: false
+      description: "Hex color to override primary accent (e.g., '#D4AF37')"
+
+    fontScaleOverride:
+      type: Double
+      required: false
+      min: 0.8
+      max: 1.4
+      description: "Font scale multiplier for accessibility"
+
+    reducedMotion:
+      type: Boolean
+      required: false
+      default: false
+      description: "Disable animations for accessibility"
+
+    ornamentStyle:
+      type: OrnamentStyle
+      required: false
+      description: "Override ornament/decoration style"
+
+# =============================================================================
+# FAMILY MEMBER MODEL
+# =============================================================================
+FamilyMember:
+  description: "A member of a family"
+  fields:
+    id:
+      type: UUID
+      required: true
+
+    name:
+      type: String
+      required: true
+      maxLength: 100
+      description: "Display name (e.g., 'Mom', 'Dad', 'Grandma')"
+
+    avatarEmoji:
+      type: String
+      required: true
+      default: "👤"
+      description: "Emoji avatar for privacy"
+
+    role:
+      type: FamilyRole
+      required: true
+      default: "member"
+
+    status:
+      type: MemberStatus
+      required: true
+      default: "active"
+      description: "Membership status"
+
+    familyId:
+      type: UUID
+      required: true
+
+    # Recipe tracking
+    createdRecipeIds:
+      type: "[UUID]"
+      required: false
+      default: []
+
+    favoriteRecipeIds:
+      type: "[UUID]"
+      required: false
+      default: []
+
+    # Member Preferences (override family settings)
+    preferences:
+      type: MemberPreferences
+      required: false
+      description: "Personal accessibility and display preferences"
+
+    # Removal tracking
+    removedAt:
+      type: Timestamp
+      required: false
+      description: "When member was removed (if status=removed)"
+
+    removedBy:
+      type: UUID
+      required: false
+      description: "Admin who removed this member"
+
+    # Timestamps
+    joinedAt:
+      type: Timestamp
+      required: true
+
+    lastActiveAt:
+      type: Timestamp
+      required: true
+
+# =============================================================================
+# MEMBER PREFERENCES MODEL
+# =============================================================================
+MemberPreferences:
+  description: "Personal preferences that override family defaults"
+  fields:
+    preferredLanguage:
+      type: LanguageCode
+      required: false
+      description: "Override family language for this member"
+
+    fontScale:
+      type: Double
+      required: false
+      min: 0.8
+      max: 1.6
+      description: "Personal font scale for accessibility"
+
+    reducedMotion:
+      type: Boolean
+      required: false
+      description: "Disable animations"
+
+    highContrast:
+      type: Boolean
+      required: false
+      description: "Enable high contrast mode"
+
+    voiceSpeed:
+      type: Double
+      required: false
+      min: 0.5
+      max: 2.0
+      default: 1.0
+      description: "TTS speech rate multiplier"
+
+# =============================================================================
+# COOKING WORKSTATE MODEL
+# =============================================================================
+CookingWorkstate:
+  description: "Current state of an active cooking session - powers context-aware assistant"
+  storage: "UserDefaults/DataStore (NOT Firebase - local only)"
+  fields:
+    # Core Session State
+    activeRecipeId:
+      type: UUID
+      required: false
+      description: "ID of recipe currently being cooked (null if not cooking)"
+
+    stepIndex:
+      type: Int
+      required: true
+      default: 0
+      description: "Current step index (0-based)"
+
+    completedSteps:
+      type: "[Int]"
+      required: true
+      default: []
+      description: "Indices of completed steps"
+
+    timers:
+      type: "[CookingTimer]"
+      required: true
+      default: []
+      description: "Active timers"
+
+    scaleFactor:
+      type: Double
+      required: true
+      default: 1.0
+      description: "Serving scale factor (e.g., 2.0 for doubled recipe)"
+
+    servingsTarget:
+      type: Int
+      required: false
+      description: "Target servings if scaled (original recipe servings * scaleFactor)"
+
+    # App Context (for smarter assistant)
+    mode:
+      type: AppMode
+      required: true
+      default: "browsing"
+      description: "Current user activity mode"
+
+    activeScreen:
+      type: ScreenContext
+      required: false
+      description: "Which screen user is on for context"
+
+    # Assistant Interaction Tracking
+    lastIntent:
+      type: String
+      required: false
+      description: "Last classified assistant intent (e.g., 'nextStep', 'substituteIngredient')"
+
+    lastAssistantQuery:
+      type: String
+      required: false
+      description: "Last user query to assistant"
+
+    lastAssistantResponse:
+      type: String
+      required: false
+      description: "Last assistant response"
+
+    lastAssistantResponseAt:
+      type: Timestamp
+      required: false
+      description: "When assistant last responded"
+
+    # User Constraints (for proactive suggestions)
+    constraints:
+      type: CookingConstraints
+      required: false
+      description: "Dietary/time constraints for smarter suggestions"
+
+    # Session Timestamps
+    lastUserActionAt:
+      type: Timestamp
+      required: true
+      description: "When user last interacted with app"
+
+    sessionStartedAt:
+      type: Timestamp
+      required: false
+      description: "When cooking session began"
+
+    sessionPausedAt:
+      type: Timestamp
+      required: false
+      description: "When session was paused (for resume)"
+
+# =============================================================================
+# COOKING CONSTRAINTS MODEL
+# =============================================================================
+CookingConstraints:
+  description: "User constraints for proactive assistant suggestions"
+  fields:
+    dietary:
+      type: "[DietaryRestriction]"
+      required: false
+      default: []
+      description: "Dietary restrictions to consider for substitutions"
+
+    allergies:
+      type: "[String]"
+      required: false
+      default: []
+      description: "Ingredients to avoid (e.g., 'peanuts', 'shellfish')"
+
+    timeBudgetMinutes:
+      type: Int
+      required: false
+      description: "Max time available for cooking"
+
+    skillLevel:
+      type: Difficulty
+      required: false
+      description: "User's cooking skill for appropriate technique explanations"
+
+    equipmentAvailable:
+      type: "[String]"
+      required: false
+      default: []
+      description: "Available equipment (e.g., 'stand mixer', 'food processor')"
+
+CookingTimer:
+  description: "An active cooking timer"
+  fields:
+    id:
+      type: UUID
+      required: true
+
+    label:
+      type: String
+      required: true
+      description: "Timer description (e.g., 'Bake until golden')"
+
+    durationSeconds:
+      type: Int
+      required: true
+
+    remainingSeconds:
+      type: Int
+      required: true
+
+    isRunning:
+      type: Boolean
+      required: true
+      default: true
+
+    stepIndex:
+      type: Int
+      required: false
+      description: "Associated step index"
+
+# =============================================================================
+# SYNC LOG MODEL (Local-only debugging)
+# =============================================================================
+SyncLog:
+  description: "Local-only conflict logging for debugging sync issues"
+  storage: "Local only, 7-day retention, never synced"
+  fields:
+    id:
+      type: UUID
+      required: true
+
+    entityId:
+      type: UUID
+      required: true
+      description: "ID of the entity that had a conflict"
+
+    entityType:
+      type: String
+      required: true
+      description: "Type: 'recipe', 'family', 'member'"
+
+    localUpdatedAt:
+      type: Timestamp
+      required: true
+      description: "Local version timestamp"
+
+    remoteUpdatedAt:
+      type: Timestamp
+      required: true
+      description: "Remote version timestamp"
+
+    resolution:
+      type: SyncResolution
+      required: true
+      description: "How conflict was resolved"
+
+    resolvedAt:
+      type: Timestamp
+      required: true
+      description: "When resolution occurred"
+
+    details:
+      type: String
+      required: false
+      description: "Additional context for debugging"
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+Enums:
+  RecipeCategory:
+    values:
+      - breakfast
+      - brunch
+      - lunch
+      - dinner
+      - appetizer
+      - snack
+      - dessert
+      - beverage
+      - side
+
+  Difficulty:
+    values:
+      - easy
+      - medium
+      - hard
+
+  MeasurementUnit:
+    values:
+      # Volume
+      - cup
+      - tablespoon
+      - teaspoon
+      - fluidOunce
+      - milliliter
+      - liter
+      # Weight
+      - gram
+      - kilogram
+      - ounce
+      - pound
+      # Count
+      - piece
+      - slice
+      - clove
+      - pinch
+      - dash
+      - toTaste
+
+  FamilyRole:
+    values:
+      - admin      # Can manage members, delete family
+      - member     # Can create/edit recipes, view all
+
+  MemberStatus:
+    values:
+      - active     # Normal member, full access
+      - removed    # Removed by admin, no access
+      - left       # Left voluntarily, no access
+
+  TemplateKey:
+    values:
+      - vintage    # Handwritten, warm browns/golds
+      - modern     # Clean, minimal, sans-serif
+      - playful    # Rounded, colorful, kid-friendly
+
+  OrnamentStyle:
+    values:
+      - none       # No decorative elements
+      - vintage    # Flourishes, aged paper effects
+      - playful    # Cute icons, doodles
+      - minimal    # Subtle lines only
+
+  LanguageCode:
+    values:
+      - en         # English
+      - es         # Spanish
+      - hi         # Hindi
+
+  UnitSystem:
+    values:
+      - imperial   # cups, ounces, Fahrenheit
+      - metric     # ml, grams, Celsius
+
+  SyncStatus:
+    values:
+      - local          # Only exists locally
+      - synced         # Synced with cloud
+      - pendingUpload  # Local changes need upload
+      - pendingDownload # Remote changes need download
+      - conflict       # Needs manual resolution
+
+  SyncResolution:
+    description: "How a sync conflict was resolved"
+    values:
+      - localWins      # Local version kept
+      - remoteWins     # Remote version kept
+      - merged         # Fields merged from both
+      - manual         # User manually resolved
+
+  # Workstate Context Enums
+  AppMode:
+    description: "Current user activity mode for context-aware assistant"
+    values:
+      - browsing   # Looking at recipes, home screen
+      - cooking    # In cooking mode, active session
+      - planning   # Creating/editing recipe, meal planning
+      - shopping   # Viewing ingredients, shopping list
+      - searching  # Actively searching for recipes
+
+  ScreenContext:
+    description: "Current screen for assistant context"
+    values:
+      - home
+      - recipeDetail
+      - cookingMode
+      - addRecipe
+      - editRecipe
+      - familySettings
+      - search
+      - settings
+
+  DietaryRestriction:
+    description: "Common dietary restrictions for substitution suggestions"
+    values:
+      - vegetarian
+      - vegan
+      - glutenFree
+      - dairyFree
+      - nutFree
+      - eggFree
+      - lowSodium
+      - lowSugar
+      - keto
+      - halal
+      - kosher
+
+# =============================================================================
+# FIREBASE STRUCTURE
+# =============================================================================
+FirebaseSchema:
+  description: "Firestore/RTDB document structure"
+  structure: |
+    /families/{familyId}
+      - name: String
+      - description: String
+      - inviteCode: String
+      - adminMemberId: String
+      - memberIds: [String]
+      - theme: String
+      - language: String
+      - units: String
+      - iconEmoji: String
+      - createdAt: Timestamp
+      - lastActivityAt: Timestamp
+
+      /members/{memberId}
+        - name: String
+        - avatarEmoji: String
+        - role: String
+        - createdRecipeIds: [String]
+        - favoriteRecipeIds: [String]
+        - preferredLanguage: String?
+        - joinedAt: Timestamp
+        - lastActiveAt: Timestamp
+
+      /recipes/{recipeId}
+        - title: String
+        - description: String
+        - ingredients: [Map]
+        - instructions: [Map]
+        - category: String
+        - difficulty: String
+        - prepTimeMinutes: Int
+        - cookTimeMinutes: Int
+        - servings: Int
+        - createdById: String
+        - familyMemory: String?
+        - favoritedBy: [String]
+        - imageUrl: String?
+        - tags: [String]
+        - createdAt: Timestamp
+        - updatedAt: Timestamp
+
+  syncRules: |
+    - Local DB is always source of truth
+    - Conflict resolution: last-write-wins based on updatedAt
+    - Lists (favoritedBy, memberIds): merge by ID, no duplicates
+    - Deletions: soft delete with 'deleted' flag, sync then hard delete

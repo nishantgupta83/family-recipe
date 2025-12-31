@@ -1,0 +1,167 @@
+# =============================================================================
+# FamilyRecipe Native - Git Ignore
+# iOS (SwiftUI) + Android (Jetpack Compose)
+# =============================================================================
+
+# ==========================
+# Common
+# ==========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+*.swp
+*.swo
+*~
+.env
+.env.*
+!.env.example
+
+# ==========================
+# iOS / Xcode
+# ==========================
+
+# Build generated
+ios/build/
+ios/DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+# Xcode workspace
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+ios/.build/
+ios/Package.resolved
+ios/.swiftpm/
+
+# CocoaPods
+ios/Pods/
+ios/Podfile.lock
+
+# Carthage
+ios/Carthage/Build/
+ios/Carthage/Checkouts/
+
+# SPM checkouts
+ios/.spm-build/
+
+# Xcode Archive
+*.xcarchive
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# App Store Connect
+ios/*.ipa
+ios/*.dSYM.zip
+ios/*.dSYM
+
+# ==========================
+# Android / Gradle
+# ==========================
+
+# Gradle files
+android/.gradle/
+android/build/
+android/app/build/
+android/*/build/
+android/**/build/
+android/gradle-app.setting
+
+# Local configuration
+android/local.properties
+android/*.properties
+!android/gradle.properties
+
+# Signing
+android/*.jks
+android/*.keystore
+android/keystore.properties
+
+# Android Studio
+android/.idea/
+android/*.iml
+android/.idea/caches
+android/.idea/libraries
+android/.idea/modules.xml
+android/.idea/workspace.xml
+android/.idea/navEditor.xml
+android/.idea/assetWizardSettings.xml
+android/captures/
+
+# APK/AAB files
+android/*.apk
+android/*.aab
+android/*.ap_
+
+# Proguard
+android/proguard/
+
+# NDK
+android/obj/
+android/.cxx/
+
+# IntelliJ
+android/out/
+android/.idea_modules/
+
+# ==========================
+# Kotlin
+# ==========================
+*.class
+*.log
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ==========================
+# IDE / Editor
+# ==========================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.settings/
+.project
+.classpath
+
+# ==========================
+# Testing
+# ==========================
+coverage/
+*.lcov
+test-results/
+junit-reports/
+
+# ==========================
+# Documentation
+# ==========================
+docs/build/
+docs/_build/
+
+# ==========================
+# Secrets / Credentials
+# ==========================
+*.pem
+*.p12
+*.cer
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+firebase.json
+.firebase/

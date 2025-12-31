@@ -1,0 +1,676 @@
+# Family Recipe App - Assistant Intents Contract
+# Version: 1.0.0
+# Rule-based intent classification for context-aware cooking assistant
+
+# =============================================================================
+# INTENT DEFINITIONS
+# =============================================================================
+
+Intents:
+  # ---------------------------------------------------------------------------
+  # NAVIGATION INTENTS
+  # ---------------------------------------------------------------------------
+  nextStep:
+    description: "Move to the next cooking step"
+    triggers:
+      - "next"
+      - "next step"
+      - "what's next"
+      - "continue"
+      - "done"
+      - "finished this step"
+      - "ready for next"
+      - "go ahead"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      Step {nextStepNumber}: {nextStepText}
+    edge_cases:
+      - condition: "at_last_step"
+        response: "That was the last step! Your {recipeTitle} should be ready."
+
+  previousStep:
+    description: "Go back to the previous step"
+    triggers:
+      - "back"
+      - "previous"
+      - "previous step"
+      - "go back"
+      - "wait"
+      - "what was that"
+      - "repeat last"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      Going back. Step {stepNumber}: {stepText}
+    edge_cases:
+      - condition: "at_first_step"
+        response: "You're already at the first step."
+
+  repeatStep:
+    description: "Repeat the current step"
+    triggers:
+      - "repeat"
+      - "say that again"
+      - "what"
+      - "sorry"
+      - "again"
+      - "one more time"
+      - "didn't catch that"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      Step {stepNumber}: {stepText}
+
+  goToStep:
+    description: "Jump to a specific step"
+    triggers:
+      - "go to step {number}"
+      - "step {number}"
+      - "jump to {number}"
+      - "skip to step {number}"
+    parameters:
+      - name: stepNumber
+        type: Int
+        required: true
+        extraction_pattern: "\\b(?:step\\s*)?(\\d+)\\b"
+    requires_active_session: true
+    response_template: |
+      Jumping to step {stepNumber}: {stepText}
+    edge_cases:
+      - condition: "invalid_step_number"
+        response: "This recipe only has {totalSteps} steps."
+
+  # ---------------------------------------------------------------------------
+  # TIMER INTENTS
+  # ---------------------------------------------------------------------------
+  setTimer:
+    description: "Set a cooking timer"
+    triggers:
+      - "set timer for {duration}"
+      - "timer {duration}"
+      - "start timer {duration}"
+      - "remind me in {duration}"
+      - "{duration} timer"
+    parameters:
+      - name: duration
+        type: Duration
+        required: true
+        extraction_patterns:
+          - "(\\d+)\\s*minutes?"
+          - "(\\d+)\\s*mins?"
+          - "(\\d+)\\s*hours?"
+          - "(\\d+)\\s*seconds?"
+    requires_active_session: false
+    response_template: |
+      Timer set for {durationFormatted}. I'll let you know when it's done.
+
+  cancelTimer:
+    description: "Cancel an active timer"
+    triggers:
+      - "cancel timer"
+      - "stop timer"
+      - "clear timer"
+      - "remove timer"
+      - "never mind the timer"
+    parameters: []
+    requires_active_session: false
+    response_template: |
+      Timer cancelled.
+    edge_cases:
+      - condition: "no_active_timer"
+        response: "There's no active timer to cancel."
+
+  checkTimer:
+    description: "Check remaining time on timer"
+    triggers:
+      - "how much time"
+      - "time left"
+      - "how long"
+      - "timer status"
+      - "check timer"
+    parameters: []
+    requires_active_session: false
+    response_template: |
+      {timeRemaining} remaining on your timer.
+    edge_cases:
+      - condition: "no_active_timer"
+        response: "You don't have any active timers."
+
+  # ---------------------------------------------------------------------------
+  # INGREDIENT INTENTS
+  # ---------------------------------------------------------------------------
+  substituteIngredient:
+    description: "Get substitution suggestions for an ingredient"
+    triggers:
+      - "substitute for {ingredient}"
+      - "what can I use instead of {ingredient}"
+      - "replacement for {ingredient}"
+      - "I don't have {ingredient}"
+      - "out of {ingredient}"
+      - "no {ingredient}"
+      - "swap {ingredient}"
+    parameters:
+      - name: ingredient
+        type: String
+        required: true
+        extraction_pattern: "(?:substitute|instead|replacement|don't have|out of|no|swap)\\s+(?:for\\s+|of\\s+)?(.+?)(?:\\?|$)"
+    requires_active_session: false
+    response_template: |
+      You can substitute {ingredient} with: {substitutionOptions}
+    edge_cases:
+      - condition: "no_substitution_found"
+        response: "I don't have a substitution for {ingredient}. Try searching online or skip it if it's optional."
+
+  scaleServings:
+    description: "Scale recipe ingredients for different serving size"
+    triggers:
+      - "scale to {number} servings"
+      - "make it for {number}"
+      - "double the recipe"
+      - "halve the recipe"
+      - "half the recipe"
+      - "triple the recipe"
+      - "{number} servings"
+      - "I'm cooking for {number}"
+    parameters:
+      - name: newServings
+        type: Int
+        required: true
+        extraction_patterns:
+          - "(\\d+)\\s*servings?"
+          - "for\\s*(\\d+)"
+        special_values:
+          double: "multiply_by_2"
+          triple: "multiply_by_3"
+          half: "divide_by_2"
+          halve: "divide_by_2"
+    requires_active_session: true
+    response_template: |
+      Scaling from {originalServings} to {newServings} servings.
+      Multiply all ingredients by {scaleFactor}.
+
+  whatIngredients:
+    description: "List ingredients for current recipe"
+    triggers:
+      - "what ingredients"
+      - "list ingredients"
+      - "what do I need"
+      - "ingredients list"
+      - "shopping list"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      For {recipeTitle}, you'll need: {ingredientsList}
+
+  # ---------------------------------------------------------------------------
+  # INFORMATION INTENTS
+  # ---------------------------------------------------------------------------
+  whatIsNext:
+    description: "Preview upcoming steps without advancing"
+    triggers:
+      - "what's coming up"
+      - "what's after this"
+      - "preview next"
+      - "upcoming steps"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      After this step, you'll: {nextStepPreview}
+
+  howLongLeft:
+    description: "Estimate remaining cooking time"
+    triggers:
+      - "how long left"
+      - "how much longer"
+      - "when will it be done"
+      - "time remaining"
+      - "eta"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      You have {remainingSteps} steps left. Estimated time: {estimatedTime}.
+
+  explainTechnique:
+    description: "Explain a cooking technique"
+    triggers:
+      - "what does {technique} mean"
+      - "how do I {technique}"
+      - "what is {technique}"
+      - "explain {technique}"
+    parameters:
+      - name: technique
+        type: String
+        required: true
+        extraction_pattern: "(?:what does|how do I|what is|explain)\\s+(.+?)(?:\\s+mean|\\?|$)"
+    requires_active_session: false
+    response_template: |
+      {techniqueExplanation}
+    edge_cases:
+      - condition: "technique_not_found"
+        response: "I'm not sure about '{technique}'. Try searching online for a demonstration."
+
+  # ---------------------------------------------------------------------------
+  # SESSION CONTROL INTENTS
+  # ---------------------------------------------------------------------------
+  startCooking:
+    description: "Begin cooking a recipe"
+    triggers:
+      - "start cooking"
+      - "let's cook"
+      - "begin"
+      - "start recipe"
+      - "cook this"
+    parameters: []
+    requires_active_session: false
+    response_template: |
+      Let's cook {recipeTitle}!
+      It makes {servings} servings and takes about {totalTime} total.
+      Step 1: {firstStepText}
+
+  pauseCooking:
+    description: "Pause the cooking session"
+    triggers:
+      - "pause"
+      - "stop"
+      - "hold on"
+      - "wait"
+      - "break"
+      - "be right back"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      Pausing at step {stepNumber}. Say 'continue' when you're ready.
+
+  resumeCooking:
+    description: "Resume a paused cooking session"
+    triggers:
+      - "resume"
+      - "continue"
+      - "I'm back"
+      - "let's continue"
+      - "where was I"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      Welcome back! You're on step {stepNumber}: {stepText}
+
+  endCooking:
+    description: "End the cooking session"
+    triggers:
+      - "end"
+      - "finish"
+      - "done cooking"
+      - "exit"
+      - "stop cooking"
+      - "all done"
+    parameters: []
+    requires_active_session: true
+    response_template: |
+      Great job! Enjoy your {recipeTitle}!
+
+  # ---------------------------------------------------------------------------
+  # HELP INTENTS
+  # ---------------------------------------------------------------------------
+  help:
+    description: "Get help with available commands"
+    triggers:
+      - "help"
+      - "what can you do"
+      - "commands"
+      - "options"
+      - "how does this work"
+    parameters: []
+    requires_active_session: false
+    response_template: |
+      I can help you cook! Try saying:
+      - "Next step" or "Previous step"
+      - "Set timer for 5 minutes"
+      - "Substitute for eggs"
+      - "Double the recipe"
+      - "How long left?"
+
+  unknown:
+    description: "Fallback for unrecognized intents"
+    triggers: []
+    parameters:
+      - name: originalQuery
+        type: String
+        required: true
+    requires_active_session: false
+    response_template: |
+      I'm not sure how to help with that. Try saying "help" for available commands.
+
+# =============================================================================
+# KNOWLEDGE BASE: SUBSTITUTIONS
+# =============================================================================
+
+Substitutions:
+  description: "Common ingredient substitutions"
+  entries:
+    eggs:
+      - name: "applesauce"
+        ratio: "1/4 cup per egg"
+        notes: "Best for baking, adds moisture"
+        use_cases: ["baking", "muffins", "cakes"]
+      - name: "flax egg"
+        ratio: "1 tbsp ground flax + 3 tbsp water"
+        notes: "Vegan option, let sit 5 minutes"
+        use_cases: ["baking", "vegan"]
+      - name: "mashed banana"
+        ratio: "1/4 cup per egg"
+        notes: "Adds sweetness, good for pancakes"
+        use_cases: ["baking", "pancakes"]
+      - name: "chia egg"
+        ratio: "1 tbsp chia + 3 tbsp water"
+        notes: "Vegan, let sit 5 minutes"
+        use_cases: ["baking", "vegan"]
+
+    butter:
+      - name: "coconut oil"
+        ratio: "1:1"
+        notes: "Solid at room temp, slight coconut flavor"
+        use_cases: ["baking", "vegan"]
+      - name: "olive oil"
+        ratio: "3/4 of butter amount"
+        notes: "Good for savory dishes"
+        use_cases: ["cooking", "sautéing"]
+      - name: "applesauce"
+        ratio: "1/2 of butter amount"
+        notes: "For baking, reduces fat"
+        use_cases: ["baking", "low-fat"]
+      - name: "Greek yogurt"
+        ratio: "1/2 of butter amount"
+        notes: "Adds moisture and protein"
+        use_cases: ["baking"]
+
+    milk:
+      - name: "oat milk"
+        ratio: "1:1"
+        notes: "Creamy, neutral flavor"
+        use_cases: ["any"]
+      - name: "almond milk"
+        ratio: "1:1"
+        notes: "Thinner, slight nutty flavor"
+        use_cases: ["baking", "smoothies"]
+      - name: "coconut milk"
+        ratio: "1:1"
+        notes: "Richer, coconut flavor"
+        use_cases: ["curries", "desserts"]
+      - name: "water + butter"
+        ratio: "1 cup milk = 1 cup water + 1 tbsp butter"
+        notes: "In a pinch"
+        use_cases: ["cooking"]
+
+    flour:
+      - name: "almond flour"
+        ratio: "1:1 (may need more)"
+        notes: "Gluten-free, denser result"
+        use_cases: ["gluten-free", "low-carb"]
+      - name: "oat flour"
+        ratio: "1 1/4 cup per 1 cup flour"
+        notes: "Blend oats to make flour"
+        use_cases: ["gluten-free"]
+      - name: "coconut flour"
+        ratio: "1/4 cup per 1 cup flour"
+        notes: "Very absorbent, use less"
+        use_cases: ["gluten-free", "low-carb"]
+
+    sugar:
+      - name: "honey"
+        ratio: "3/4 cup per 1 cup sugar"
+        notes: "Reduce other liquids slightly"
+        use_cases: ["baking"]
+      - name: "maple syrup"
+        ratio: "3/4 cup per 1 cup sugar"
+        notes: "Adds maple flavor"
+        use_cases: ["baking", "pancakes"]
+      - name: "stevia"
+        ratio: "1 tsp per 1 cup sugar"
+        notes: "Very concentrated"
+        use_cases: ["low-sugar"]
+
+    sour_cream:
+      - name: "Greek yogurt"
+        ratio: "1:1"
+        notes: "Lower fat, similar texture"
+        use_cases: ["any"]
+      - name: "cottage cheese (blended)"
+        ratio: "1:1"
+        notes: "Blend until smooth"
+        use_cases: ["baking"]
+
+    heavy_cream:
+      - name: "coconut cream"
+        ratio: "1:1"
+        notes: "Vegan, coconut flavor"
+        use_cases: ["whipping", "curries"]
+      - name: "milk + butter"
+        ratio: "3/4 cup milk + 1/4 cup melted butter"
+        notes: "Won't whip but works in recipes"
+        use_cases: ["cooking"]
+
+    garlic:
+      - name: "garlic powder"
+        ratio: "1/8 tsp per clove"
+        notes: "Less pungent"
+        use_cases: ["any"]
+
+    onion:
+      - name: "onion powder"
+        ratio: "1 tbsp per medium onion"
+        notes: "For flavor, not texture"
+        use_cases: ["seasoning"]
+      - name: "shallots"
+        ratio: "3 shallots per onion"
+        notes: "Milder, more delicate"
+        use_cases: ["cooking"]
+
+# =============================================================================
+# KNOWLEDGE BASE: COOKING TECHNIQUES
+# =============================================================================
+
+Techniques:
+  description: "Cooking technique explanations"
+  entries:
+    sauté:
+      explanation: "Cook quickly in a small amount of fat over medium-high heat, stirring frequently."
+      tips: "Heat pan first, then add oil. Food should sizzle when it hits the pan."
+
+    fold:
+      explanation: "Gently combine ingredients by cutting down through the mixture, across the bottom, and up the side."
+      tips: "Use a rubber spatula in a J-motion to keep air in the batter."
+
+    blanch:
+      explanation: "Briefly boil vegetables then plunge into ice water to stop cooking."
+      tips: "Keep water at a rolling boil. Usually 1-3 minutes depending on vegetable."
+
+    braise:
+      explanation: "Sear food then cook slowly in liquid in a covered pot."
+      tips: "Low and slow is key. Liquid should come about halfway up the meat."
+
+    deglaze:
+      explanation: "Add liquid to a hot pan to loosen browned bits stuck to the bottom."
+      tips: "Remove pan from heat briefly, add liquid, then scrape with wooden spoon."
+
+    dice:
+      explanation: "Cut food into small cubes, typically 1/4 to 1/2 inch."
+      tips: "First slice, then cut into strips, then cut strips into cubes."
+
+    julienne:
+      explanation: "Cut food into thin, matchstick-sized strips."
+      tips: "Aim for strips about 2 inches long and 1/8 inch thick."
+
+    mince:
+      explanation: "Cut food into very small pieces, smaller than diced."
+      tips: "Rock the knife back and forth over the food until very fine."
+
+    simmer:
+      explanation: "Cook liquid just below boiling, with small bubbles breaking at the surface."
+      tips: "If it's bubbling vigorously, turn down the heat."
+
+    whisk:
+      explanation: "Beat ingredients together to incorporate air and blend evenly."
+      tips: "Use circular motions and lift the whisk slightly to add air."
+
+    cream:
+      explanation: "Beat butter and sugar together until light and fluffy."
+      tips: "Use room temperature butter. Beat 3-5 minutes until pale and fluffy."
+
+    proof:
+      explanation: "Let yeast dough rise in a warm place until doubled in size."
+      tips: "Cover with a damp towel. A warm oven (turned off) works well."
+
+    temper:
+      explanation: "Gradually raise the temperature of a cold ingredient by slowly adding hot liquid."
+      tips: "Add hot liquid to eggs slowly while whisking constantly to avoid scrambling."
+
+    reduce:
+      explanation: "Boil a liquid to evaporate water and concentrate flavor."
+      tips: "Use a wide pan for faster reduction. Don't cover."
+
+    rest:
+      explanation: "Let cooked meat sit before cutting to redistribute juices."
+      tips: "Rest for about 5-10 minutes per inch of thickness."
+
+    sear:
+      explanation: "Cook meat quickly at high heat to create a browned crust."
+      tips: "Pat meat dry first. Don't move it until it releases easily from the pan."
+
+    poach:
+      explanation: "Cook gently in barely simmering liquid."
+      tips: "Water should be 160-180°F with just a few small bubbles."
+
+# =============================================================================
+# PROACTIVE HINTS (Context-Triggered Suggestions)
+# =============================================================================
+
+ProactiveHints:
+  description: "Suggestions triggered by context, not user request"
+  rule: "Hints are offered once per condition, not repeated if dismissed"
+
+  hints:
+    timer_suggestion:
+      condition: "step_has_timer && no_timer_set"
+      trigger_keywords: ["bake", "simmer", "cook for", "minutes", "until"]
+      suggestion: "Would you like me to set a timer for this step?"
+      priority: high
+      dismissable: true
+
+    technique_explanation:
+      condition: "step_mentions_technique && user_skill_beginner"
+      trigger_keywords: ["sauté", "fold", "blanch", "deglaze", "julienne", "braise"]
+      suggestion: "Would you like me to explain what '{technique}' means?"
+      priority: medium
+      dismissable: true
+
+    substitution_offer:
+      condition: "ingredient_flagged_as_allergy"
+      trigger: "workstate.constraints.allergies contains ingredient"
+      suggestion: "I noticed this recipe uses {ingredient}. Would you like a substitution?"
+      priority: high
+      dismissable: true
+
+    serving_adjustment:
+      condition: "recipe_servings != workstate.servingsTarget"
+      trigger: "servingsTarget is set and differs from recipe.servings"
+      suggestion: "This recipe makes {recipeServings} servings. Want me to scale it to {targetServings}?"
+      priority: low
+      dismissable: true
+
+    safety_reminder:
+      condition: "step_involves_raw_protein"
+      trigger_keywords: ["raw chicken", "raw meat", "ground beef", "pork", "poultry"]
+      suggestion: "Remember to wash hands and surfaces after handling raw {protein}."
+      priority: high
+      dismissable: false
+
+    completion_celebration:
+      condition: "at_last_step && step_completed"
+      trigger: "user says 'done' or 'finished' on final step"
+      suggestion: "Congratulations! Your {recipeTitle} is ready. Enjoy your meal!"
+      priority: high
+      dismissable: false
+
+# =============================================================================
+# FOOD SAFETY GUARDRAILS
+# =============================================================================
+
+SafetyRules:
+  description: "Food safety guidance to prevent unsafe advice"
+  rule: "Safety takes precedence over convenience suggestions"
+
+  temperature_guidance:
+    poultry:
+      safe_temp_f: 165
+      safe_temp_c: 74
+      response: "Poultry should reach an internal temperature of 165°F (74°C)."
+
+    ground_meat:
+      safe_temp_f: 160
+      safe_temp_c: 71
+      response: "Ground meat should reach an internal temperature of 160°F (71°C)."
+
+    pork:
+      safe_temp_f: 145
+      safe_temp_c: 63
+      response: "Pork should reach an internal temperature of 145°F (63°C) and rest for 3 minutes."
+
+    beef_steak:
+      safe_temp_f: 145
+      safe_temp_c: 63
+      response: "Beef steaks should reach at least 145°F (63°C) for medium-rare."
+
+    fish:
+      safe_temp_f: 145
+      safe_temp_c: 63
+      response: "Fish should reach an internal temperature of 145°F (63°C)."
+
+    reheating:
+      safe_temp_f: 165
+      safe_temp_c: 74
+      response: "When reheating leftovers, heat to 165°F (74°C)."
+
+  handling_guidance:
+    raw_protein:
+      response: "Wash hands with soap for 20 seconds after handling raw meat. Clean all surfaces."
+
+    eggs:
+      response: "Use pasteurized eggs for recipes requiring raw eggs. Cook eggs until yolks are firm."
+
+    cross_contamination:
+      response: "Use separate cutting boards for raw meat and produce."
+
+  fallback:
+    uncertain_safety_question:
+      response: "I'm not certain about food safety for that. Please check a trusted source like USDA.gov or consult a food safety expert."
+
+    medical_dietary:
+      response: "For medical dietary advice, please consult a healthcare professional."
+
+# =============================================================================
+# INTENT CLASSIFICATION RULES
+# =============================================================================
+
+ClassificationRules:
+  description: "How to classify user input into intents"
+
+  priority_order:
+    - "safety_override"    # Safety concerns take priority
+    - "exact_match"        # Exact trigger phrase match
+    - "keyword_match"      # Contains key trigger words
+    - "fuzzy_match"        # Similar to trigger phrases
+    - "context_inference"  # Infer from workstate context
+    - "unknown"            # Fallback
+
+  confidence_thresholds:
+    high: 0.85            # Execute immediately
+    medium: 0.65          # Execute with confirmation option
+    low: 0.45             # Ask for clarification
+    reject: 0.45          # Below this, use unknown intent
+
+  context_rules:
+    - "If in cooking mode, bias toward navigation intents"
+    - "If timer is active, bias toward timer intents"
+    - "If ingredient mentioned, check substitution first"
+    - "If question format, bias toward information intents"
