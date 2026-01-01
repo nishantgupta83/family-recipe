@@ -19,6 +19,10 @@ class CookingModeViewModel: ObservableObject {
         startTimerUpdates()
     }
 
+    deinit {
+        timerCancellable?.cancel()
+    }
+
     // MARK: - Computed Properties
 
     var currentStepIndex: Int {

@@ -23,7 +23,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -113,7 +113,7 @@ fun RecipePageComposable(
 
             Spacer(modifier = Modifier.height(tokens.spacing.md))
 
-            Divider(color = tokens.palette.divider)
+            HorizontalDivider(color = tokens.palette.divider)
 
             Spacer(modifier = Modifier.height(tokens.spacing.md))
 

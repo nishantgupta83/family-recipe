@@ -1,5 +1,29 @@
 import SwiftUI
 
+// MARK: - Template Key Enum
+
+enum TemplateKey: String, Codable, CaseIterable {
+    case vintage
+    case modern
+    case playful
+
+    var displayName: String {
+        switch self {
+        case .vintage: return "Vintage Cookbook"
+        case .modern: return "Modern Kitchen"
+        case .playful: return "Playful Family"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .vintage: return "Warm, nostalgic, like grandma's recipe cards"
+        case .modern: return "Clean, minimal, contemporary design"
+        case .playful: return "Fun, colorful, perfect for cooking with kids"
+        }
+    }
+}
+
 // MARK: - Template Tokens
 
 /// Design tokens that define a visual template - matches core-contract/tokens/design-tokens.yaml

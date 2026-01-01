@@ -101,29 +101,7 @@ final class Family {
     }
 }
 
-// MARK: - Enums
-
-enum TemplateKey: String, Codable, CaseIterable {
-    case vintage
-    case modern
-    case playful
-
-    var displayName: String {
-        switch self {
-        case .vintage: return "Vintage Cookbook"
-        case .modern: return "Modern Kitchen"
-        case .playful: return "Playful Family"
-        }
-    }
-
-    var description: String {
-        switch self {
-        case .vintage: return "Warm, nostalgic, like grandma's recipe cards"
-        case .modern: return "Clean, minimal, contemporary design"
-        case .playful: return "Fun, colorful, perfect for cooking with kids"
-        }
-    }
-}
+// MARK: - Enums (TemplateKey moved to TemplateTokens.swift)
 
 enum LanguageCode: String, Codable, CaseIterable {
     case en
